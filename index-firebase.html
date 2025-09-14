@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Blocksmith</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinning-block"></div>
+        <div class="loading-text">The Blocksmith</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+        <div class="loading-status" id="loadingStatus">Loading...</div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>The Blocksmith</h2>
+                <p>Login or create an account to start playing</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" onclick="switchTab('register')">Register</button>
+                <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+            </div>
+            
+            <div id="authStatus" class="auth-status" style="display: none;"></div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername">Username:</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email:</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password:</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirm Password:</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            
+            <!-- Settings Form -->
+            <form id="settingsForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password:</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Confirm New Password:</label>
+                    <input type="password" id="confirmNewPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Console Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h2>Admin Console</h2>
+                <button class="close-btn" onclick="closeAdminConsole()">&times;</button>
+            </div>
+            
+            <div class="admin-commands">
+                <div class="command-input">
+                    <input type="text" id="adminCommandInput" placeholder="Enter command: .give player amount or .remove player amount" autocomplete="off">
+                    <button class="btn-execute" onclick="executeAdminCommand()">Execute</button>
+                </div>
+                <div class="command-examples">
+                    <div class="example-command" onclick="fillCommand('.give username 1000')">.give username 1000</div>
+                    <div class="example-command" onclick="fillCommand('.remove username 500')">.remove username 500</div>
+                </div>
+            </div>
+            <div class="admin-log" id="adminLog"></div>
+        </div>
+    </div>
+
+    <!-- Main Game Interface -->
+    <div class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="game-title">The Blocksmith</div>
+            <div class="header-right">
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <div class="user-details">
+                        <span id="usernameDisplay"></span>
+                        <span id="userRankBadge" class="rank-badge"></span>
+                    </div>
+                    <div class="balance-display" id="balanceDisplay" onclick="handleBalanceClick()">$0.00</div>
+                    <button class="btn-secondary" onclick="logout()">Logout</button>
+                </div>
+                <div id="authSection" class="auth-section">
+                    <button class="btn-primary" onclick="showAuthModal()">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="game-main">
+            <!-- Game Panel -->
+            <div class="game-panel">
+                <div class="game-info">
+                    <div class="round-info">
+                        <div class="round-number">Round #<span id="roundNumber">1</span></div>
+                        <div class="game-mode" id="gameMode">Normal</div>
+                    </div>
+                    <div class="difficulty-display">
+                        <span class="difficulty-label">Difficulty:</span>
+                        <div class="difficulty-bar">
+                            <div class="difficulty-fill" id="difficultyFill"></div>
+                            <span class="difficulty-value" id="difficultyValue">1.0x</span>
+                        </div>
+                        <div class="difficulty-description" id="difficultyDescription">Medium difficulty</div>
+                    </div>
+                    <div class="multiplier-display">
+                        <span class="multiplier-label">Multiplier:</span>
+                        <span class="multiplier-value" id="multiplierValue">1.00x</span>
+                    </div>
+                </div>
+
+                <!-- Block Progress -->
+                <div class="block-container">
+                    <div class="block-progress">
+                        <div class="block-fill" id="blockFill"></div>
+                        <div class="block-percentage" id="blockPercentage">0%</div>
+                    </div>
+                </div>
+
+                <!-- Betting Area -->
+                <div class="betting-area">
+                    <div class="bet-input">
+                        <label for="betAmount">Bet Amount:</label>
+                        <input type="number" id="betAmount" min="0.01" step="0.01" placeholder="Enter bet amount">
+                    </div>
+                    
+                    <div class="quick-bet-amounts">
+                        <button class="quick-bet-btn" onclick="setBetAmount(1)">$1</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(5)">$5</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(10)">$10</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(25)">$25</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(50)">$50</button>
+                        <button class="quick-bet-btn" onclick="setBetAmount(100)">$100</button>
+                    </div>
+                    
+                    <div class="fraction-bet-options">
+                        <button class="fraction-bet-btn" onclick="setBetFraction(0.25)">1/4 IN</button>
+                        <button class="fraction-bet-btn" onclick="setBetFraction(0.5)">1/2 IN</button>
+                        <button class="fraction-bet-btn" onclick="setBetFraction(1)">ALL IN</button>
+                    </div>
+                    
+                    <div class="bet-actions">
+                        <button id="betButton" class="btn-bet" onclick="placeBet()">START MINING</button>
+                        <button id="cashoutButton" class="btn-cashout" onclick="cashOut()" disabled>CASH OUT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Leaderboard -->
+                <div class="leaderboard">
+                    <h3>Leaderboard</h3>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <!-- Leaderboard items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Game History -->
+                <div class="game-history">
+                    <h3>Your Game History</h3>
+                    <div class="history-list" id="historyList">
+                        <!-- Game history will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+      import { getDatabase } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js';
+      import { getAuth } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+    </script>
+
+    <script src="crypto-js.min.js"></script>
+    <script src="game.js"></script>
+    <script>
+        // Simple Firebase integration
+        let game;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing game...');
+            try {
+                game = new BlocksmithGame();
+                console.log('Game initialized successfully');
+            } catch (error) {
+                console.error('Error initializing game:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocksmith Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a4a;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>The Blocksmith - System Test</h1>
+    
+    <div class="test-section">
+        <h2>Authentication Test</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testRegister()">Test Register</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+        <div id="authResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Account Management Test</h2>
+        <button onclick="listAccounts()">List All Accounts</button>
+        <button onclick="checkOwnerAccount()">Check Owner Account</button>
+        <div id="accountResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Game State Test</h2>
+        <button onclick="testGameInit()">Test Game Initialization</button>
+        <div id="gameResult" class="result"></div>
+    </div>
+
+    <script>
+        // Test functions
+        function testLogin() {
+            const result = document.getElementById('authResult');
+            try {
+                // Test the owner account login
+                const accounts = JSON.parse(localStorage.getItem('blocksmith_accounts') || '[]');
+                const owner = accounts.find(acc => acc.username === 'iydl');
+                
+                if (owner) {
+                    result.innerHTML = `
+                        <strong>Login Test:</strong> Owner account found<br>
+                        Username: ${owner.username}<br>
+                        Rank: ${owner.rank}<br>
+                        Balance: $${owner.balance}<br>
+                        Password Hash: ${owner.password.substring(0, 20)}...
+                    `;
+                } else {
+                    result.innerHTML = '<strong>Login Test:</strong> Owner account not found';
+                }
+            } catch (error) {
+                result.innerHTML = `<strong>Login Test Error:</strong> ${error.message}`;
+            }
+        }
+        
+        function testRegister() {
+            const result = document.getElementById('authResult');
+            try {
+                const testUser = {
+                    username: 'testuser',
+                    password: 'hashedpassword',
+                    balance: 1000,
+                    rank: 'user',
+                    createdAt: new Date().toISOString(),
+                    gamesPlayed: 0,
+                    totalWon: 0,
+                    totalLost: 0
+                };
+                
+                const accounts = JSON.parse(localStorage.getItem('blocksmith_accounts') || '[]');
+                accounts.push(testUser);
+                localStorage.setItem('blocksmith_accounts', JSON.stringify(accounts));
+                
+                result.innerHTML = '<strong>Register Test:</strong> Test user created successfully';
+            } catch (error) {
+                result.innerHTML = `<strong>Register Test Error:</strong> ${error.message}`;
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('blocksmith_accounts');
+            localStorage.removeItem('blocksmith_current_user');
+            localStorage.removeItem('blocksmith_recent_games');
+            document.getElementById('authResult').innerHTML = '<strong>Storage Cleared:</strong> All game data removed';
+        }
+        
+        function listAccounts() {
+            const result = document.getElementById('accountResult');
+            try {
+                const accounts = JSON.parse(localStorage.getItem('blocksmith_accounts') || '[]');
+                if (accounts.length === 0) {
+                    result.innerHTML = '<strong>No accounts found</strong>';
+                } else {
+                    let html = `<strong>Accounts (${accounts.length}):</strong><br>`;
+                    accounts.forEach((acc, index) => {
+                        html += `${index + 1}. ${acc.username} (${acc.rank}) - $${acc.balance}<br>`;
+                    });
+                    result.innerHTML = html;
+                }
+            } catch (error) {
+                result.innerHTML = `<strong>Account List Error:</strong> ${error.message}`;
+            }
+        }
+        
+        function checkOwnerAccount() {
+            const result = document.getElementById('accountResult');
+            try {
+                const accounts = JSON.parse(localStorage.getItem('blocksmith_accounts') || '[]');
+                const owner = accounts.find(acc => acc.username === 'iydl');
+                
+                if (owner) {
+                    result.innerHTML = `
+                        <strong>Owner Account Check:</strong> ✅ Found<br>
+                        Username: ${owner.username}<br>
+                        Rank: ${owner.rank}<br>
+                        Balance: $${owner.balance}<br>
+                        Created: ${owner.createdAt}
+                    `;
+                } else {
+                    result.innerHTML = '<strong>Owner Account Check:</strong> ❌ Not found - Run game initialization first';
+                }
+            } catch (error) {
+                result.innerHTML = `<strong>Owner Check Error:</strong> ${error.message}`;
+            }
+        }
+        
+        function testGameInit() {
+            const result = document.getElementById('gameResult');
+            try {
+                // Simulate game initialization
+                const accounts = JSON.parse(localStorage.getItem('blocksmith_accounts') || '[]');
+                if (!accounts.find(acc => acc.username === 'iydl')) {
+                    const ownerAccount = {
+                        username: 'iydl',
+                        password: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8',
+                        balance: 100000,
+                        rank: 'owner',
+                        createdAt: new Date().toISOString(),
+                        gamesPlayed: 0,
+                        totalWon: 0,
+                        totalLost: 0
+                    };
+                    accounts.push(ownerAccount);
+                    localStorage.setItem('blocksmith_accounts', JSON.stringify(accounts));
+                }
+                
+                result.innerHTML = '<strong>Game Init Test:</strong> ✅ Owner account initialized successfully';
+            } catch (error) {
+                result.innerHTML = `<strong>Game Init Error:</strong> ${error.message}`;
+            }
+        }
+        
+        // Auto-run some tests on page load
+        window.addEventListener('load', () => {
+            testGameInit();
+            listAccounts();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      },
+      ".read": "auth != null"
+    },
+    "usernames": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "games": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "adminLogs": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('rank').val() == 'admin' || root.child('users').child(auth.uid).child('rank').val() == 'owner')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('rank').val() == 'admin' || root.child('users').child(auth.uid).child('rank').val() == 'owner')"
+    }
+  }
+}
